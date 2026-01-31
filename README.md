@@ -1,0 +1,2 @@
+# B-N-PH-H-P-NG-NH-H-C-N-O-
+HÃY XEM NGHỀ NGHIỆP TƯƠNG LAI CỦA BẠN NÀO!!! 
