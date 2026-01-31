@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Khảo sát ngành học</title>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  background:linear-gradient(135deg,#1f3c88,#6a11cb);
+  color:#fff;
+}
+
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:24px;
+}
+
+.card{
+  background:rgba(0,0,0,.35);
+  border-radius:20px;
+  padding:24px;
+  box-shadow:0 20px 40px rgba(0,0,0,.3);
+}
+
+h1{margin-top:0;font-size:26px}
+h3{font-size:20px}
+
+.option{
+  margin:12px 0;
+  padding:16px 18px;
+  border-radius:14px;
+  font-size:18px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.2s;
+  background:linear-gradient(135deg,#ff9800,#ff5722);
+  color:#fff;
+}
+
+.option:nth-child(2n){background:linear-gradient(135deg,#03a9f4,#00bcd4)}
+.option:nth-child(3n){background:linear-gradient(135deg,#8bc34a,#4caf50)}
+.option:nth-child(4n){background:linear-gradient(135deg,#e91e63,#f06292)}
+
+.option:hover{
+  transform:scale(1.03);
+  filter:brightness(1.1);
+}
+
+.progress{
+  height:12px;
+  background:rgba(255,255,255,.2);
+  border-radius:999px;
+  overflow:hidden;
+  margin:16px 0;
+}
+.progress div{
+  height:100%;
+  background:#00e5ff;
+  width:0%;
+  transition:.3s;
+}
+
+.result{
+  text-align:center;
+  padding:20px;
+}
+
+.result h2{
+  font-size:32px;
+  color:#00e5ff;
+}
+
+.small{
+  opacity:.85;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <div class="card">
+    <h1>🤖 AI Khảo sát sở thích ngành học</h1>
+    <p class="small">Trả lời nhanh – AI gợi ý ngành phù hợp nhất cho bạn</p>
+
+    <div class="progress"><div id="bar"></div></div>
+    <div id="app"></div>
+  </div>
+</div>
+
+<script>
+/* ===== 1. NGÂN HÀNG CÂU HỎI (8 CÂU – LINH HOẠT) ===== */
+const questions = [
+{
+ q:"Bạn thích hoạt động nào nhất?",
+ a:[
+  ["Giao tiếp, ngoại ngữ","NN"],
+  ["Làm việc với máy tính","IT"],
+  ["Sửa chữa máy móc","CK"],
+  ["Thiết bị điện – mạch điện","DT"],
+  ["Làm đẹp, chăm sóc da","CS"],
+  ["Chăm sóc động vật","TY"]
+ ]
+},
+{
+ q:"Bạn thích môn học nào hơn?",
+ a:[
+  ["Tiếng Anh","NN"],
+  ["Tin học","IT"],
+  ["Công nghệ","CK"],
+  ["Vật lý – điện","DT"],
+  ["Mỹ thuật – làm đẹp","CS"],
+  ["Sinh học","TY"]
+ ]
+},
+{
+ q:"Bạn thấy mình hợp với môi trường nào?",
+ a:[
+  ["Giao tiếp quốc tế","NN"],
+  ["Văn phòng – máy tính","IT"],
+  ["Xưởng – máy móc","CK"],
+  ["Thiết bị – kỹ thuật","DT"],
+  ["Spa – thẩm mỹ","CS"],
+  ["Trang trại – phòng khám thú","TY"]
+ ]
+},
+{
+ q:"Bạn thường được khen ở điểm nào?",
+ a:[
+  ["Phát âm, giao tiếp","NN"],
+  ["Tư duy logic","IT"],
+  ["Khéo tay","CK"],
+  ["Hiểu kỹ thuật","DT"],
+  ["Gu thẩm mỹ","CS"],
+  ["Yêu động vật","TY"]
+ ]
+},
+{
+ q:"Bạn thích công việc mang tính nào?",
+ a:[
+  ["Giao tiếp","NN"],
+  ["Tư duy – công nghệ","IT"],
+  ["Thực hành","CK"],
+  ["Kỹ thuật","DT"],
+  ["Thẩm mỹ","CS"],
+  ["Chăm sóc","TY"]
+ ]
+},
+{
+ q:"Bạn muốn làm việc với đối tượng nào?",
+ a:[
+  ["Con người","NN"],
+  ["Dữ liệu – máy tính","IT"],
+  ["Máy móc","CK"],
+  ["Thiết bị điện","DT"],
+  ["Khách hàng làm đẹp","CS"],
+  ["Động vật","TY"]
+ ]
+},
+{
+ q:"Bạn thích kiểu công việc nào?",
+ a:[
+  ["Năng động, giao tiếp","NN"],
+  ["Ổn định, trí óc","IT"],
+  ["Tay chân","CK"],
+  ["Kỹ thuật chính xác","DT"],
+  ["Sáng tạo","CS"],
+  ["Chăm sóc, y tế","TY"]
+ ]
+},
+{
+ q:"Bạn cảm thấy tự tin nhất khi…",
+ a:[
+  ["Nói chuyện","NN"],
+  ["Dùng máy tính","IT"],
+  ["Sửa đồ","CK"],
+  ["Làm việc với điện","DT"],
+  ["Làm đẹp cho người khác","CS"],
+  ["Chăm sóc thú","TY"]
+ ]
+}
+];
+
+/* ===== 2. LOGIC AI ===== */
+let index=0;
+let score={NN:0,IT:0,CK:0,DT:0,CS:0,TY:0};
+const app=document.getElementById("app");
+const bar=document.getElementById("bar");
+
+function show(){
+ const q=questions[index];
+ bar.style.width=((index/questions.length)*100)+"%";
+ let html=`<h3>${index+1}. ${q.q}</h3>`;
+ q.a.forEach(x=>{
+  html+=`<div class="option" onclick="pick('${x[1]}')">${x[0]}</div>`;
+ });
+ app.innerHTML=html;
+}
+
+function pick(code){
+ score[code]++;
+ index++;
+ if(index<questions.length) show();
+ else finish();
+}
+
+function finish(){
+ bar.style.width="100%";
+ const result=Object.keys(score).reduce((a,b)=>score[a]>score[b]?a:b);
+ const map={
+  NN:"NGOẠI NGỮ",
+  IT:"CÔNG NGHỆ THÔNG TIN",
+  CK:"CƠ KHÍ",
+  DT:"ĐIỆN TỬ",
+  CS:"CHĂM SÓC SẮC ĐẸP",
+  TY:"DỊCH VỤ THÚ Y"
+ };
+ app.innerHTML=`
+  <div class="result">
+    <h2>🎯 ${map[result]}</h2>
+    <p>Ngành học phù hợp nhất với bạn</p>
+    <p class="small">Kết quả được AI gợi ý dựa trên sở thích của bạn</p>
+  </div>
+ `;
+}
+
+show();
+</script>
+</body>
+</html>
